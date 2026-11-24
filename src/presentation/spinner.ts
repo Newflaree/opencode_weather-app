@@ -1,4 +1,4 @@
-import { cyan } from "./colors.ts";
+import { cyan } from "../utils/colors.ts";
 
 const FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 const INTERVAL = 100;

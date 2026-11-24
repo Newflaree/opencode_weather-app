@@ -2,7 +2,7 @@
 
 ## Commands
 
-- Run app: `bun run index.ts` (or `bun index.ts`)
+- Run app: `bun run src/index.ts` (or `bun src/index.ts`)
 - Typecheck: `bun run typecheck` (runs `bun check`)
 - No test or lint scripts exist yet; do not claim tests pass.
 
