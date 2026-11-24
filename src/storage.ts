@@ -3,7 +3,8 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { Config } from "./types.ts";
 
-const DIR = join(homedir(), ".config", "weather-cli");
+const BASE_DIR = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+const DIR = join(BASE_DIR, "weather-cli");
 const FILE = join(DIR, "config.json");
 
 const DEFAULT_CONFIG: Config = { cities: [], defaultId: null, unit: "c" };
