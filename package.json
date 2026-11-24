@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "typecheck": "bun check",
-    "build": "bun build --compile src/index.ts --outfile weather",
+    "test": "bun test --isolate",
+    "test:coverage": "bun test --isolate --coverage",
+    "build": "bun test --isolate && bun build --compile src/index.ts --outfile weather",
     "start": "bun run src/index.ts",
     "dev": "bun run src/index.ts --watch"
   },
