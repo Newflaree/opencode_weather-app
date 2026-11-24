@@ -26,6 +26,9 @@ async function main(): Promise<void> {
       case "5":
         config = await actions.actionSetDefault(config);
         break;
+      case "6":
+        await actions.actionForecast7(config);
+        break;
       case "8":
         config = await actions.actionSettings(config);
         break;

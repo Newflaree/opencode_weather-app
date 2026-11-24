@@ -1,5 +1,5 @@
 import type { City, Config } from "./types.ts";
-import { geocodeCity, getForecast } from "./api.ts";
+import { geocodeCity, getForecast, getDailyForecast, describeWeather } from "./api.ts";
 import { saveConfig } from "./storage.ts";
 import { ask } from "./menu.ts";
 import { green, red, yellow } from "./colors.ts";
@@ -138,6 +138,41 @@ export async function actionSetDefault(config: Config): Promise<Config> {
   await saveConfig(next);
   console.log(green(`  Ciudad por defecto: ${chosen.name}`));
   return next;
+}
+
+export async function actionForecast7(config: Config): Promise<void> {
+  if (config.cities.length === 0) {
+    console.log(red("  No hay ciudades guardadas."));
+    return;
+  }
+  config.cities.forEach((c, i) => console.log(`  ${i + 1}. ${cityLabel(c)}`));
+  const idxStr = await ask("  Número de ciudad para el pronóstico: ");
+  const idx = Number(idxStr) - 1;
+  if (Number.isNaN(idx) || idx < 0 || idx >= config.cities.length) {
+    console.log(red("  Opción inválida."));
+    return;
+  }
+  const city = config.cities[idx]!;
+  const days = await withSpinner(`Obteniendo pronóstico de ${city.name}…`, () =>
+    getDailyForecast(city.latitude, city.longitude),
+  );
+  console.log("");
+  console.log(`  ${cityLabel(city)}`);
+  const today = new Date().toISOString().slice(0, 10);
+  for (const d of days) {
+    const label =
+      d.date === today
+        ? "hoy"
+        : new Date(`${d.date}T00:00:00`).toLocaleDateString("es", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+          });
+    const desc = describeWeather(d.code);
+    console.log(
+      `  ${label.padEnd(14)} ${desc.padEnd(24)} ${toDisplay(d.max, config.unit)} / ${toDisplay(d.min, config.unit)}`,
+    );
+  }
 }
 
 export async function actionSettings(config: Config): Promise<Config> {

@@ -29,6 +29,7 @@ export function renderMenu(config: Config): void {
   console.log("  3. Buscar y agregar ciudad");
   console.log("  4. Eliminar ciudad");
   console.log("  5. Establecer ciudad default");
+  console.log("  6. Pronóstico 7 días");
   console.log(`  8. Ajustes (${unitLabel})`);
   console.log("  9. Salir");
   console.log(LINE);
