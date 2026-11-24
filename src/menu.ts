@@ -1,7 +1,8 @@
 import readline from "node:readline";
 import type { Config } from "./types.ts";
+import { cyan } from "./colors.ts";
 
-const LINE = "═".repeat(40);
+const LINE = cyan("═".repeat(40));
 
 let rl: readline.Interface | null = null;
 let iterator: AsyncIterator<string> | null = null;
@@ -21,7 +22,7 @@ export function renderMenu(config: Config): void {
   const unitLabel = config.unit === "c" ? "°C" : "°F";
   console.log("");
   console.log(LINE);
-  console.log("         WEATHER CLI");
+  console.log(cyan("         WEATHER CLI"));
   console.log(LINE);
   console.log("  1. Clima de ciudad default");
   console.log(`  2. Clima de todas las ciudades (${config.cities.length})`);

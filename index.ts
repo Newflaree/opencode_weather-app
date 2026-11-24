@@ -2,6 +2,7 @@ import { loadConfig } from "./src/storage.ts";
 import type { Config } from "./src/types.ts";
 import { renderMenu, ask, closeRL } from "./src/menu.ts";
 import * as actions from "./src/weather.ts";
+import { green, red } from "./src/colors.ts";
 
 async function main(): Promise<void> {
   let config: Config = await loadConfig();
@@ -29,11 +30,11 @@ async function main(): Promise<void> {
         config = await actions.actionSettings(config);
         break;
       case "9":
-        console.log("  ¡Hasta luego!");
+        console.log(green("  ¡Hasta luego!"));
         closeRL();
         return;
       default:
-        console.log("  Opción no válida.");
+        console.log(red("  Opción no válida."));
     }
   }
 }

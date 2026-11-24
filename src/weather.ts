@@ -2,10 +2,14 @@ import type { City, Config } from "./types.ts";
 import { geocodeCity, getForecast } from "./api.ts";
 import { saveConfig } from "./storage.ts";
 import { ask } from "./menu.ts";
+import { green, red, yellow } from "./colors.ts";
 
 export function toDisplay(tempC: number, unit: Config["unit"]): string {
-  if (unit === "f") return `${(tempC * 9 / 5 + 32).toFixed(1)}°F`;
-  return `${tempC.toFixed(1)}°C`;
+  const value =
+    unit === "f"
+      ? `${(tempC * 9 / 5 + 32).toFixed(1)}°F`
+      : `${tempC.toFixed(1)}°C`;
+  return yellow(value);
 }
 
 export async function showWeather(city: City, unit: Config["unit"]): Promise<void> {
@@ -16,7 +20,7 @@ export async function showWeather(city: City, unit: Config["unit"]): Promise<voi
 export async function actionDefault(config: Config): Promise<void> {
   const city = config.cities.find((c) => c.id === config.defaultId) ?? null;
   if (!city) {
-    console.log("  No hay ciudad por defecto. Usa la opción 5.");
+    console.log(red("  No hay ciudad por defecto. Usa la opción 5."));
     return;
   }
   await showWeather(city, config.unit);
@@ -24,7 +28,7 @@ export async function actionDefault(config: Config): Promise<void> {
 
 export async function actionAll(config: Config): Promise<void> {
   if (config.cities.length === 0) {
-    console.log("  No hay ciudades guardadas.");
+    console.log(red("  No hay ciudades guardadas."));
     return;
   }
   for (const city of config.cities) {
@@ -35,12 +39,12 @@ export async function actionAll(config: Config): Promise<void> {
 export async function actionAdd(config: Config): Promise<Config> {
   const name = await ask("  Nombre de la ciudad: ");
   if (!name) {
-    console.log("  Nombre vacío.");
+    console.log(red("  Nombre vacío."));
     return config;
   }
   const geo = await geocodeCity(name);
   if (!geo) {
-    console.log("  Ciudad no encontrada.");
+    console.log(red("  Ciudad no encontrada."));
     return config;
   }
   const city: City = {
@@ -56,21 +60,21 @@ export async function actionAdd(config: Config): Promise<Config> {
   const next: Config = { ...config, cities, defaultId };
   await saveConfig(next);
   const forecast = await getForecast(city.latitude, city.longitude);
-  console.log(`  ${city.name} agregada. Clima actual: ${toDisplay(forecast.temperature, next.unit)}`);
-  if (isFirst) console.log("  Establecida como ciudad por defecto.");
+  console.log(green(`  ${city.name} agregada. Clima actual: ${toDisplay(forecast.temperature, next.unit)}`));
+  if (isFirst) console.log(green("  Establecida como ciudad por defecto."));
   return next;
 }
 
 export async function actionDelete(config: Config): Promise<Config> {
   if (config.cities.length === 0) {
-    console.log("  No hay ciudades para eliminar.");
+    console.log(red("  No hay ciudades para eliminar."));
     return config;
   }
   config.cities.forEach((c, i) => console.log(`  ${i + 1}. ${c.name}`));
   const idxStr = await ask("  Número de ciudad a eliminar: ");
   const idx = Number(idxStr) - 1;
   if (Number.isNaN(idx) || idx < 0 || idx >= config.cities.length) {
-    console.log("  Opción inválida.");
+    console.log(red("  Opción inválida."));
     return config;
   }
   const removed = config.cities[idx]!;
@@ -78,36 +82,36 @@ export async function actionDelete(config: Config): Promise<Config> {
   let defaultId = config.defaultId;
   if (defaultId === removed.id) {
     defaultId = null;
-    console.log(`  Se eliminó la ciudad por defecto (${removed.name}). Establece una nueva con la opción 5.`);
+    console.log(red(`  Se eliminó la ciudad por defecto (${removed.name}). Establece una nueva con la opción 5.`));
   }
   const next: Config = { ...config, cities, defaultId };
   await saveConfig(next);
-  console.log(`  ${removed.name} eliminada.`);
+  console.log(green(`  ${removed.name} eliminada.`));
   return next;
 }
 
 export async function actionSetDefault(config: Config): Promise<Config> {
   if (config.cities.length === 0) {
-    console.log("  No hay ciudades guardadas.");
+    console.log(red("  No hay ciudades guardadas."));
     return config;
   }
   config.cities.forEach((c, i) => console.log(`  ${i + 1}. ${c.name}`));
   const idxStr = await ask("  Número de ciudad por defecto: ");
   const idx = Number(idxStr) - 1;
   if (Number.isNaN(idx) || idx < 0 || idx >= config.cities.length) {
-    console.log("  Opción inválida.");
+    console.log(red("  Opción inválida."));
     return config;
   }
   const chosen = config.cities[idx]!;
   const next: Config = { ...config, defaultId: chosen.id };
   await saveConfig(next);
-  console.log(`  Ciudad por defecto: ${chosen.name}`);
+  console.log(green(`  Ciudad por defecto: ${chosen.name}`));
   return next;
 }
 
 export async function actionSettings(config: Config): Promise<Config> {
   const next: Config = { ...config, unit: config.unit === "c" ? "f" : "c" };
   await saveConfig(next);
-  console.log(`  Unidad cambiada a ${next.unit === "c" ? "°C" : "°F"}`);
+  console.log(green(`  Unidad cambiada a ${next.unit === "c" ? "°C" : "°F"}`));
   return next;
 }
