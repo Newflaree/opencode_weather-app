@@ -3,6 +3,7 @@ import { geocodeCity, getForecast } from "./api.ts";
 import { saveConfig } from "./storage.ts";
 import { ask } from "./menu.ts";
 import { green, red, yellow } from "./colors.ts";
+import { withSpinner } from "./spinner.ts";
 
 export function toDisplay(tempC: number, unit: Config["unit"]): string {
   const value =
@@ -30,7 +31,7 @@ export async function actionDefault(config: Config): Promise<void> {
     console.log(red("  No hay ciudad por defecto. Usa la opción 5."));
     return;
   }
-  await showWeather(city, config.unit);
+  await withSpinner("Obteniendo clima…", () => showWeather(city, config.unit));
 }
 
 export async function actionAll(config: Config): Promise<void> {
@@ -39,7 +40,9 @@ export async function actionAll(config: Config): Promise<void> {
     return;
   }
   for (const city of config.cities) {
-    await showWeather(city, config.unit);
+    await withSpinner(`Obteniendo clima de ${city.name}…`, () =>
+      showWeather(city, config.unit),
+    );
   }
 }
 
@@ -49,7 +52,7 @@ export async function actionAdd(config: Config): Promise<Config> {
     console.log(red("  Nombre vacío."));
     return config;
   }
-  const results = await geocodeCity(name);
+  const results = await withSpinner("Buscando ciudad…", () => geocodeCity(name));
   if (results.length === 0) {
     console.log(red("  Ciudad no encontrada."));
     return config;
@@ -85,7 +88,9 @@ export async function actionAdd(config: Config): Promise<Config> {
   if (isFirst) defaultId = city.id;
   const next: Config = { ...config, cities, defaultId };
   await saveConfig(next);
-  const forecast = await getForecast(city.latitude, city.longitude);
+  const forecast = await withSpinner("Obteniendo clima…", () =>
+    getForecast(city.latitude, city.longitude),
+  );
   console.log(green(`  ${cityLabel(city)} agregada. Clima actual: ${toDisplay(forecast.temperature, next.unit)}`));
   if (isFirst) console.log(green("  Establecida como ciudad por defecto."));
   return next;

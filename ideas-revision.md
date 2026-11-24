@@ -6,4 +6,4 @@
 - [ ] **Tests:** no existen; conviene al menos probar storage y las APIs con mocks.
 - [ ] **Binario:** compila bien; revisar que `./weather` guarde datos en `~/.config/weather-cli/`.
 - [ ] **Escalabilidad:** ¿qué tan fácil será expandir con nuevas funcionalidades?
-- [ ] **Carga:** ¿hay estado de carga en las tareas asíncronas?
+- [x] **Carga:** estado de carga animado en tareas asíncronas (spinner en `src/spinner.ts`, usado en `src/weather.ts`).
