@@ -2,7 +2,7 @@
 
 - [x]  **Colores:** definidos en `src/colors.ts` (cyan menú, amarillo temp, verde/rojo ok/error), con detección TTY y respeto a `NO_COLOR`.
 - [ ] **AGENTS.md:** dice que `index.ts` es stub, pero la app ya funciona — hay que actualizarlo.
-- [ ] **Ciudades:** geocoding solo trae 1 resultado; nombres ambiguos pueden fallar.
+- [x] **Ciudades:** geocoding ahora trae 5 resultados y permite elegir la coincidencia (con región y país) o cancelar.
 - [ ] **Tests:** no existen; conviene al menos probar storage y las APIs con mocks.
 - [ ] **Binario:** compila bien; revisar que `./weather` guarde datos en `~/.config/weather-cli/`.
 - [ ] **Escalabilidad:** ¿qué tan fácil será expandir con nuevas funcionalidades?

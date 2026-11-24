@@ -6,12 +6,12 @@ export interface GeoResult {
   admin1?: string;
 }
 
-export async function geocodeCity(name: string): Promise<GeoResult | null> {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=es&format=json`;
+export async function geocodeCity(name: string): Promise<GeoResult[]> {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=es&format=json`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Geocoding falló: ${res.status}`);
   const data = (await res.json()) as { results?: GeoResult[] };
-  return data.results?.[0] ?? null;
+  return data.results ?? [];
 }
 
 export interface Forecast {

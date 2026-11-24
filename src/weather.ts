@@ -12,9 +12,16 @@ export function toDisplay(tempC: number, unit: Config["unit"]): string {
   return yellow(value);
 }
 
+export function cityLabel(city: City): string {
+  const parts = [city.name];
+  if (city.admin1) parts.push(city.admin1);
+  if (city.country) parts.push(city.country);
+  return parts.join(", ");
+}
+
 export async function showWeather(city: City, unit: Config["unit"]): Promise<void> {
   const forecast = await getForecast(city.latitude, city.longitude);
-  console.log(`  ${city.name}: ${toDisplay(forecast.temperature, unit)}`);
+  console.log(`  ${cityLabel(city)}: ${toDisplay(forecast.temperature, unit)}`);
 }
 
 export async function actionDefault(config: Config): Promise<void> {
@@ -42,16 +49,35 @@ export async function actionAdd(config: Config): Promise<Config> {
     console.log(red("  Nombre vacío."));
     return config;
   }
-  const geo = await geocodeCity(name);
-  if (!geo) {
+  const results = await geocodeCity(name);
+  if (results.length === 0) {
     console.log(red("  Ciudad no encontrada."));
     return config;
   }
+  console.log("  Coincidencias encontradas:");
+  results.forEach((r, i) => {
+    const label = [r.name, r.admin1, r.country].filter(Boolean).join(", ");
+    console.log(`  ${i + 1}. ${label}`);
+  });
+  console.log("  0. Cancelar");
+  const idxStr = await ask("  Selecciona una opción: ");
+  const idx = Number(idxStr);
+  if (Number.isNaN(idx) || idx < 0 || idx > results.length) {
+    console.log(red("  Opción inválida."));
+    return config;
+  }
+  if (idx === 0) {
+    console.log(red("  Cancelado."));
+    return config;
+  }
+  const geo = results[idx - 1]!;
   const city: City = {
     id: crypto.randomUUID(),
     name: geo.name,
     latitude: geo.latitude,
     longitude: geo.longitude,
+    country: geo.country,
+    admin1: geo.admin1,
   };
   const cities = [...config.cities, city];
   let defaultId = config.defaultId;
@@ -60,7 +86,7 @@ export async function actionAdd(config: Config): Promise<Config> {
   const next: Config = { ...config, cities, defaultId };
   await saveConfig(next);
   const forecast = await getForecast(city.latitude, city.longitude);
-  console.log(green(`  ${city.name} agregada. Clima actual: ${toDisplay(forecast.temperature, next.unit)}`));
+  console.log(green(`  ${cityLabel(city)} agregada. Clima actual: ${toDisplay(forecast.temperature, next.unit)}`));
   if (isFirst) console.log(green("  Establecida como ciudad por defecto."));
   return next;
 }
@@ -70,7 +96,7 @@ export async function actionDelete(config: Config): Promise<Config> {
     console.log(red("  No hay ciudades para eliminar."));
     return config;
   }
-  config.cities.forEach((c, i) => console.log(`  ${i + 1}. ${c.name}`));
+  config.cities.forEach((c, i) => console.log(`  ${i + 1}. ${cityLabel(c)}`));
   const idxStr = await ask("  Número de ciudad a eliminar: ");
   const idx = Number(idxStr) - 1;
   if (Number.isNaN(idx) || idx < 0 || idx >= config.cities.length) {
@@ -95,7 +121,7 @@ export async function actionSetDefault(config: Config): Promise<Config> {
     console.log(red("  No hay ciudades guardadas."));
     return config;
   }
-  config.cities.forEach((c, i) => console.log(`  ${i + 1}. ${c.name}`));
+  config.cities.forEach((c, i) => console.log(`  ${i + 1}. ${cityLabel(c)}`));
   const idxStr = await ask("  Número de ciudad por defecto: ");
   const idx = Number(idxStr) - 1;
   if (Number.isNaN(idx) || idx < 0 || idx >= config.cities.length) {
